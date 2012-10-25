@@ -20,7 +20,57 @@ which information moves from node to node is entirely bottom-up.    An attribute
 side of the production.
 
 Attributes whose values are calculated when their symbol is on the right-hand side of the current production are said to be \textbf{inherited attributes}. They allow contextual information to flow into a symbol from above or from the side, so that the rules of that production can be enforced in different ways (or generate different values) depending on surrounding context. Symbol table information is commonly passed from symbol to symbol by means of inherited attributes. Inherited attributes of the root of the parse tree can also be used to represent the external environment.\\
+\\
+\\
+\\
+\noindent
+7. Show the stack with all activation record instances, including the dynamic chain, when
+execution reaches position 1 in the following skeletal program. This program uses the deep-
+access method to implement dynamic scoping.\\
+void fun1() \{\\
+float a;\\
+...\\
+\}\\
+void fun2() \{\\
+int b, c;\\
+...\\
+\}\\
+void fun3() \{\\
+float d;\\
+... \verb+       + $\longleftarrow$ 1\\
+\}\\
+void main() \{\\
+char e, f, g;\\
+...\\
+\}\\
+The calling sequence for this program for execution to reach fun3 is:\\
+main calls fun2\\
+fun2 calls fun1\\
+fun1 calls fun1\\
+fun1 calls fun3\\
+\emph{Answer}:\\
+If local variables are stack dynamic and are part of the activation records in a
+dynamic-scoped language, references to nonlocal variables can be resolved by
+searching through the activation record instances of the other subprograms
+that are currently active, beginning with the one most recently activated.
 
+The dynamic chain links together all subprogram activation record instances in the reverse of the order in which they were activated. Therefore, the dynamic chain is exactly what is needed to reference
+nonlocal variables in a dynamic-scoped language. This method is called deep
+access, because access may require searches deep into the stack.
+
+The activation records for the given code example is:\\
+\begin{figure}
+\centering
+\includegraphics[scale=0.6]{q7}
+\end{figure}
+\pagebreak
+\\
+\\
+\\
+\\
+\\
+\\
+\\
 \noindent
 8. Design a skeletal program and a calling sequence that results in an activation
    record instance in which the static and dynamic links point to different
