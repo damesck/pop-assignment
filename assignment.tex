@@ -68,6 +68,81 @@ A simple attribute grammar for constant expressions, using the standard arithmet
 \verb+       +$\triangleright$ F.val := const\\
 \end{quote}
 
+\noindent
+3. Determine the output for C++ code using pass-by-reference and using
+pass-by-value methods for parameter passing using the following code:\\
+\begin{quote}
+void mystery(int\& a, int\& b, int c)\\
+\{\\
+\verb|    |a=b+c;\\
+\verb|    |b=0;\\
+\verb|    |c=0;\\
+\}\\
+void print (void)\\
+\{\\
+\verb|    |int x = 0, y = 1, z = 2;\\
+\verb|    |mystery(x, y, z);\\
+\verb|    |cout \verb|<<| x \verb|<<| ''  ''   \verb|<<| y \verb|<<| ''  '' \verb|<<| z;\\
+\verb|    |mystery(x, y, z);\\
+\verb|    |cout \verb|<<| x \verb|<<| ''  '' \verb|<<| y \verb|<<| ''  '' \verb|<<| z \verb|<<| endl;\\
+\}\\
+\end{quote}
+\emph{Answer}:
+
+Passing by reference refers to a method of passing arguments whereby the value of an argument whereby the value of the argument in the \emph{calling} function can be modified in the \emph{called} function. In C++, by default, parameters are passed by value. When srguments are passed by value, copies of arguments are received by the called function and thus changes made in the called functions are not reflected in the calling function.
+
+Hence, in the mystery() function, changes made to the parameters a and b are reflected in the main() function, while the the third argument c remains unchanged in the main() function. Therefore, the output from this program is:\\
+3  0  2\\
+2  0  2\\
+
+\noindent
+4. Write a program to determine the factorial of an integer input with and without recursion.\\
+\emph{Answer}:
+
+The following is a C function (using recursion) to calculate the factorial:\\
+\begin{quote}
+long int factorial (int num)\\
+\{\\
+\verb|    |if ((num == 0) || (num == 1))\\
+\verb|    |\{\\
+\verb|        |return 1;\\
+\verb|    |\}\\
+\verb|    |else\\
+\verb|    |\{\\
+\verb|        | return (num * factorial (num - 1));\\
+\verb|    |\}\\
+\}\\
+\end{quote}
+\emph{Algorithm}:\\
+\begin{enumerate}
+\item START
+\item If the input \textit{num} is either zero or one, return one (STOP).
+\item Return the product of \textit{num} and the result of calling this function with argument of \emph{(num-1)}
+\item STOP
+\end{enumerate}
+The same result can be achieved using iteration instead of recursion as follows:\\
+\begin{quote}
+long int factorial (int num)\\
+\{\\
+\verb|    |long int result = 1;\\
+\verb|    |int i;\\
+\verb|    |for (i = 1; i \verb|<=| num; i++)\\
+\verb|    |\{\\
+\verb|    |\verb|    |result = result * i;\\
+\verb|    |\}\\
+\verb|    |return result;\\
+\}\\
+\end{quote}
+\emph{Algorithm}:\\
+\begin{enumerate}
+\item START
+\item Initialise variables \textit{result} (to one) and \textit{i} to zero.
+\item If \emph{i} is greater than \emph{num}, go to step 5.
+\item Set the value of \emph{result} to the product of \emph{result} and \emph{i}
+\item Return the value of the variable \emph{result}.
+\item STOP
+\end{enumerate}
+\noindent
 5. Draw the dependency graph for semantic rules associated with the productions listed below.
 \begin{center}
 \begin{tabular}{|c|c|}
@@ -94,17 +169,17 @@ The graph just drawn is called the dependency graph. In addition to being genera
 Evaluating L-Attributed :
 Thus what we need is to find an evaluation order respecting the arrows. This is called a topological sort. The rule is that the needed ordering can be found if and only if there are no (directed) cycles. The algorithm is simple.
 \begin{enumerate}
-\item Choose a node having no incoming edges 
+\item Choose a node having no incoming edges
 \item Delete the node and all outgoing edges.
 \item Repeat
 \end{enumerate}
 
-The rules for calculating A.syn, B.inh, and C.inh are shown in the table. The attribute A.inh would have been set by the parent of A in the tree; the semantic rule generating A.inh would be given with the production at the parent. 
+The rules for calculating A.syn, B.inh, and C.inh are shown in the table. The attribute A.inh would have been set by the parent of A in the tree; the semantic rule generating A.inh would be given with the production at the parent.
 \begin{figure}[!bhp]
 \centering
 \includegraphics[scale=0.4]{q5}
 \end{figure}
-The attributes X.syn and Y.syn are calculated at the children of B and C respectively. X.syn can depend of X.inh and on values in the triangle below X; similarly for Y.syn. 
+The attributes X.syn and Y.syn are calculated at the children of B and C respectively. X.syn can depend of X.inh and on values in the triangle below X; similarly for Y.syn.
 \begin{enumerate}
 \item A is invoked (viewing the traversal as a program) and is passed its inherited attributes (A.inh in our case, but of course there could be several such attributes), which have been evaluated at its parent.
 \item B is invoked by A and is given B.inh, which A has calculated. In programming terms: A executes
@@ -122,7 +197,7 @@ The attributes X.syn and Y.syn are calculated at the children of B and C respect
 \item[ ] In reality there could be more synthesized attributes, there could be more children, the children could have children, etc.
 \end{itemize}
 \item B returns to A passing back B.syn, which can depend on B.inh (given to B by A in step 2) and X.syn (given to B by X in the previous step).
-\item A calls C giving C its inherited attributes, which can depend on A.inh (given to A, by A's parent), B.inh (previously calculated by A in step 2), and B.syn (given to A by B in step 5). 
+\item A calls C giving C its inherited attributes, which can depend on A.inh (given to A, by A's parent), B.inh (previously calculated by A in step 2), and B.syn (given to A by B in step 5).
 \item C calls its first child, just as B did.
 \item The child returns to C, just as B's child returned to B.
 \item C returns to A passing back C.syn, just as B did.
