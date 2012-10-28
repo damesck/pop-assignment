@@ -31,7 +31,7 @@ Type representations can be hidden by declaring them in the header file as point
 
 A grammar that generates properly formed constant expressions over the basic arithmetic operators, but it says nothing about their meaning. To tie these expressions to mathematical concepts, we need additional notation. The most common is based on attributes. The intent is that for any symbol S, S.val will be the meaning, as an arithmetic value, of the token string derived from S. We assume that the Val of a const is provided to us by the scanner. We must then invent a set of rules for each production to specify how the Vals of different symbols are related. In simple grammar, every production has a single rule. We shall see more complicated grammars later in which productions can have several rules. The rules come in two forms. \textit{Copy rules}, they specify that one attribute should be a copy of another. The other rules invoke \textit{semantic functions} (sum, quotient, additive inverse, etc.). In general Semantic functions can be arbitrarily complex functions specified by the language designer. Each semantic function takes an arbitrary number of arguments (each of which must be an attribute of a symbol in the current production: no constants, global variables,
 etc.), and each computes a single result, which must likewise be assigned into an attribute of a symbol in the current production. When more than one symbol of a production has the same name, subscripts are used to distinguish them. These subscripts are solely for the benefit of the semantic functions; they are not part of the context-free grammar itself.
-In a strict definitionof attribute grammars, copy rules and semantic function calls are the only two kinds of permissible rules. In practice, it is common to allow rules to consist of small fragments of code in some well-defined notation (e.g., the language in which a compiler is being written) so that simple semantic functions can be written out ``in-line.'' These code fragments are not allowed to refer to any variables or attributes outside the current production. In our examples we use a $\triangleright$    symbol to introduce each code fragment corresponding to a single semantic function.
+In a strict definition of attribute grammars, copy rules and semantic function calls are the only two kinds of permissible rules. In practice, it is common to allow rules to consist of small fragments of code in some well-defined notation (e.g., the language in which a compiler is being written) so that simple semantic functions can be written out ``in-line.'' These code fragments are not allowed to refer to any variables or attributes outside the current production. In our examples we use a $\triangleright$    symbol to introduce each code fragment corresponding to a single semantic function.
 
 Semantic functions must be written in some already-existing notation, because
 attribute grammars do not really specify the meaning of a program; rather, they provide a way to associate a program with something else that presumably has meaning. Neither the notation for semantic functions nor the types of the attributes themselves (i.e., the domain of values passed to and returned from semantic functions) is intrinsic to the attribute grammar notion. In the preceding example, we have used an attribute grammar to associate numeric values with the symbols in our grammar, using semantic functions drawn from ordinary arithmetic. In the code generation phase of a compiler, we might associate fragments of target machine code with our symbols, using semantic functions written in some existing programming language. If we were interested in defining the meaning of a programming language in a machine-independent way, our attributes might be domain theory \textit{denotations} (these are the basis of \textit{denotational semantics}). If we were interested in proving theorems about the behavior of programs in our language, our attributes might be logical formulas (this is the basis of \textit{axiomatic semantics}).\\
@@ -69,7 +69,71 @@ A simple attribute grammar for constant expressions, using the standard arithmet
 \verb+       +$\triangleright$ F.val := const\\
 \end{quote}
 
-6. Describe and differentiate between synthesised and inherited attributes.\\
+5. Draw the dependency graph for semantic rules associated with the productions listed below.\\
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+Production &  Semantic Rules\\
+\hline
+A $\longrightarrow$ BC & B.inh = A.inh\\
+&C.inh=A.inh-B.inh+B.syn\\
+&A.syn=A.inh*B.inh+B.syn-C.inh/C.syn\\
+&X.inh=something\\
+\hline
+B $\longrightarrow$ X & B.syn=B.inh+X.syn\\
+\hline
+C $\longrightarrow$ Y & Y.inh=something\\
+\hline
+& C.syn=C.inh+Y.syn\\
+\hline
+\end{tabular}
+\end{center}
+\emph{Answer}:
+
+The simplest counter example is the single production A $\rightarrow$ B with synthesized attribute A.syn, inherited attribute B.inh, and rules A.syn=B.inh and B.inh=A.syn+1. This means to evaluate A.syn at the parent node we need B.inh at the child and vice versa.\\
+A parse tree decorated with attributes, is called an annotated parse tree.\\
+The graph just drawn is called the dependency graph. In addition to being generally useful in recording the relations between attributes, it shows the evaluation order can be used. \\
+Evaluating L-Attributed :
+Thus what we need is to find an evaluation order respecting the arrows. This is called a topological sort. The rule is that the needed ordering can be found if and only if there are no (directed) cycles. The algorithm is simple.
+\begin{enumerate}
+\item Choose a node having no incoming edges 
+\item Delete the node and all outgoing edges.
+\item Repeat
+\end{enumerate}
+
+The rules for calculating A.syn, B.inh, and C.inh are shown in the table. The attribute A.inh would have been set by the parent of A in the tree; the semantic rule generating A.inh would be given with the production at the parent. 
+\begin{figure}[!bhp]
+\centering
+\includegraphics[scale=0.4]{q5}
+\end{figure}
+The attributes X.syn and Y.syn are calculated at the children of B and C respectively. X.syn can depend of X.inh and on values in the triangle below X; similarly for Y.syn. 
+\begin{enumerate}
+\item A is invoked (viewing the traversal as a program) and is passed its inherited attributes (A.inh in our case, but of course there could be several such attributes), which have been evaluated at its parent.
+\item B is invoked by A and is given B.inh, which A has calculated. In programming terms: A executes
+\begin{itemize}
+\item[ ] call B(B.inh)
+\item[ ]  where the argument has been evaluated by A. This argument can depend on A.inh since the parent of A has given A this value.
+\end{itemize}
+\item B calls its first child (in our example X is the only child) and passes to the child the child's inherited attributes. In programming terms: B executes
+\begin{itemize}
+\item[ ] call X(X.inh)
+\end{itemize}
+\item The child returns, passing back to B the synthesized attributes of the child. In programming terms: X executes
+\begin{itemize}
+\item[ ] return X.syn
+\item[ ] In reality there could be more synthesized attributes, there could be more children, the children could have children, etc.
+\end{itemize}
+\item B returns to A passing back B.syn, which can depend on B.inh (given to B by A in step 2) and X.syn (given to B by X in the previous step).
+\item A calls C giving C its inherited attributes, which can depend on A.inh (given to A, by A's parent), B.inh (previously calculated by A in step 2), and B.syn (given to A by B in step 5). 
+\item C calls its first child, just as B did.
+\item The child returns to C, just as B's child returned to B.
+\item C returns to A passing back C.syn, just as B did.
+\item A returns to its parent passing back A.syn, which can depend on A.inh (given to A by its parent in step 1), B.inh calculated by A in step 2, B.syn (given to A by B in step 5), C.inh (calculated by A in step 6), and C.syn (given to A by C in step 9).
+\end{enumerate}
+
+\noindent
+Formally do a depth first traversal of the tree and evaluate inherited attributes on the way down and synthetic attributes on the way up. This corresponds to an Euler-tour traversal. It also corresponds to a call graph of a program where actions are taken at each call and each return.\\
+6. Describe and differentiate between synthesized and inherited attributes.\\
 \emph{Answer}:
 
 \textbf{Synthesized attributes} are those attributes whose values are only in productions in which their symbol appears on the left-hand side.For annotated parse trees this means that the attribute flow --- the pattern in
@@ -215,7 +279,7 @@ flow graph --- that is, if no attribute, in any parse tree, ever depends (transi
 \textbf{Significance}:    S-attributed grammars are the most general class of attribute grammars for which evaluation can be implemented on-the-fly during an LR parse. L-attributed grammars are a proper superset of S-attributed grammars. They are the most general class of attribute grammars for which evaluation can be implemented on-the-fly during an LL parse.\\
 \\
 \noindent
-10. Explain Space Management Atrributes for Context-free grammar for a calculator language.\\
+10. Explain Space Management Attributes for Context-free grammar for a calculator language.\\
 \emph{Answer}:\\
 Any attribute evaluation method requires space to hold the attributes of the
 grammar symbols. If we are building an explicit parse tree, then the obvious approach is to store attributes in the nodes of the tree themselves. If we are not building a parse tree, then we need to find a way to keep track of the attributes
