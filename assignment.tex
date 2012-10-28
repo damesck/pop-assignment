@@ -69,7 +69,7 @@ A simple attribute grammar for constant expressions, using the standard arithmet
 \verb+       +$\triangleright$ F.val := const\\
 \end{quote}
 
-5. Draw the dependency graph for semantic rules associated with the productions listed below.\\
+5. Draw the dependency graph for semantic rules associated with the productions listed below.
 \begin{center}
 \begin{tabular}{|c|c|}
 \hline
@@ -78,12 +78,11 @@ Production &  Semantic Rules\\
 A $\longrightarrow$ BC & B.inh = A.inh\\
 &C.inh=A.inh-B.inh+B.syn\\
 &A.syn=A.inh*B.inh+B.syn-C.inh/C.syn\\
-&X.inh=something\\
 \hline
-B $\longrightarrow$ X & B.syn=B.inh+X.syn\\
+B $\longrightarrow$ X &X.inh=something\\
+& B.syn=B.inh+X.syn\\
 \hline
 C $\longrightarrow$ Y & Y.inh=something\\
-\hline
 & C.syn=C.inh+Y.syn\\
 \hline
 \end{tabular}
