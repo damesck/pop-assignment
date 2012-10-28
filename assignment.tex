@@ -12,6 +12,63 @@
 \author{Chidambaram P G, Fathima K M, Mohan S Nayaka, Muhassin Babu M M\\ Pathang V S, Selvam G, Suraj K}
 \maketitle
 \noindent
+1. Write a short note on separate compilation [Section 11.6 - Sebesta]\\
+\emph{Answer}:
+
+When the size of a program is large, two practical problems become evident. One is that the organization of a program as a single collection of subprograms and abstract type definitions is inadequate and the second problem is that recompilation. For large programs, the cost of recompilation is significant. So, there is an obvious need to find ways to avoid recompilation of the parts of a program that are not affected by a change. The obvious solution to both of these problems is to organize programs into collections of logically related code and data, each of which can be compiled without recompilation of the rest of the program. An \textbf{encapsulation} is such a collection.
+
+Encapsulations are often placed in libraries and made available for reuse in programs other than those for which they were written. Techniques for providing encapsulations have been evolving for some time. In languages that allow nested subprograms, programs can be organized by nesting subprogram definitions inside the logically larger subprograms that use them. This can be done in Ada, Fortran 95, Python, and Ruby. Even in languages that allow nested subprograms, they are not used as a primary organizing encapsulation construct.
+
+\textbf{Encapsulation in C}
+
+C does not provide complete support for abstract data types, although both abstract data types and multiple-type encapsulations can be simulated. In C, a collection of related functions and data definitions can be placed in a file, which can be independently compiled, acts as a library, and has an implementation of its entities. The interface to such a file, including data, type, and function declarations, is placed in a separate file called a \textbf{header file}.
+
+Type representations can be hidden by declaring them in the header file as pointers to struct types. Implementation file includes definitions of struct types. This approach has the same drawbacks as the use of pointers as abstract data types in Ada packages -- namely, the inherent problems of pointers and the potential confusion with assignment and comparisons of pointers. The header file, in source form, and the compiled version of the implementation file are furnished to clients. When such a library is used, the header file is included in the client code, using an \#include pre-processor specification, so that references to functions and data in the client code can be type checked. The \#include specification also documents the fact that the client program depends on the library implementation file. This approach effectively separates the specification and implementation of an encapsulation. Although these encapsulations work, they create some insecurity. First, the documentation of the dependence of the client program on the library (and its header file) is lost. Second, the author of the library could change the header file and the implementation file, but the client could attempt to use the new implementation file (not realizing it had changed) but with the old header file, which the user had copied into his or her client program. Thus, it is the user's responsibility to ensure that both the header and implementation files are up-to-date. This is often done with a make utility (a dependency management tool).\\
+\\
+\noindent
+2. Example and explanation of a simple attribute grammar,\\ \textit{[Sec. 4.2, page 166, Programming Language Pragmatics (Scott)]}\\
+\emph{Answer}:
+
+A grammar that generates properly formed constant expressions over the basic arithmetic operators, but it says nothing about their meaning. To tie these expressions to mathematical concepts, we need additional notation. The most common is based on attributes. The intent is that for any symbol S, S.val will be the meaning, as an arithmetic value, of the token string derived from S. We assume that the Val of a const is provided to us by the scanner. We must then invent a set of rules for each production to specify how the Vals of different symbols are related. In simple grammar, every production has a single rule. We shall see more complicated grammars later in which productions can have several rules. The rules come in two forms. \textit{Copy rules}, they specify that one attribute should be a copy of another. The other rules invoke \textit{semantic functions} (sum, quotient, additive inverse, etc.). In general Semantic functions can be arbitrarily complex functions specified by the language designer. Each semantic function takes an arbitrary number of arguments (each of which must be an attribute of a symbol in the current production: no constants, global variables,
+etc.), and each computes a single result, which must likewise be assigned into an attribute of a symbol in the current production. When more than one symbol of a production has the same name, subscripts are used to distinguish them. These subscripts are solely for the benefit of the semantic functions; they are not part of the context-free grammar itself.
+In a strict definitionof attribute grammars, copy rules and semantic function calls are the only two kinds of permissible rules. In practice, it is common to allow rules to consist of small fragments of code in some well-defined notation (e.g., the language in which a compiler is being written) so that simple semantic functions can be written out ``in-line.'' These code fragments are not allowed to refer to any variables or attributes outside the current production. In our examples we use a $\triangleright$    symbol to introduce each code fragment corresponding to a single semantic function.
+
+Semantic functions must be written in some already-existing notation, because
+attribute grammars do not really specify the meaning of a program; rather, they provide a way to associate a program with something else that presumably has meaning. Neither the notation for semantic functions nor the types of the attributes themselves (i.e., the domain of values passed to and returned from semantic functions) is intrinsic to the attribute grammar notion. In the preceding example, we have used an attribute grammar to associate numeric values with the symbols in our grammar, using semantic functions drawn from ordinary arithmetic. In the code generation phase of a compiler, we might associate fragments of target machine code with our symbols, using semantic functions written in some existing programming language. If we were interested in defining the meaning of a programming language in a machine-independent way, our attributes might be domain theory \textit{denotations} (these are the basis of \textit{denotational semantics}). If we were interested in proving theorems about the behavior of programs in our language, our attributes might be logical formulas (this is the basis of \textit{axiomatic semantics}).\\
+Example: An LR (bottom-up) grammar for arithmetic expressions composed of constants, with precedence and associativity:\\
+\begin{quote}
+E $\longrightarrow$ E  + T\\
+E $\longrightarrow$ E  - T\\
+E $\longrightarrow$ T\\
+T $\longrightarrow$ T  * F\\
+T $\longrightarrow$ T  / F\\
+T $\longrightarrow$  F\\
+F $\longrightarrow$ - F\\
+F $\longrightarrow$ (E)\\
+F $\longrightarrow$ const\\
+\end{quote}
+A simple attribute grammar for constant expressions, using the standard arithmetic operations.\\
+\begin{quote}
+1. $E_1$ $\longrightarrow$ $E_2$ + T \\
+\verb+       +$\triangleright$ $E_1$.val := sum($E_2$.val + T.val)\\
+2. $E_1$ $\longrightarrow$ $E_2$ - T \\
+\verb+       +$\triangleright$ $E_1$.val := sum($E_2$.val - T.val)\\
+3. E $\longrightarrow$  T \\
+\verb+       +$\triangleright$ E.val := T.val\\
+4. $T_1$ $\longrightarrow$ $T_2$ * F \\
+\verb+       +$\triangleright$ $T_1$.val := product($T_2$.val * F.val)\\
+5. $T_1$ $\longrightarrow$ $T_2$ / F \\
+\verb+       +$\triangleright$ $T_1$.val := quotient($T_2$.val / F.val)\\
+6. T $\longrightarrow$  F \\
+\verb+       +$\triangleright$ T.val := F.val\\
+7. $F_1$ $\longrightarrow$ $-F_2$\\
+\verb+       +$\triangleright$ $F_1$.val := additive\_inverse($F_2$.val)\\
+8. F $\longrightarrow$  (E) \\
+\verb+       +$\triangleright$ F.val := E.val\\
+9. F $\longrightarrow$ const\\
+\verb+       +$\triangleright$ F.val := const\\
+\end{quote}
+
 6. Describe and differentiate between synthesised and inherited attributes.\\
 \emph{Answer}:
 
